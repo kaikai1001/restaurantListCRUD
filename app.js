@@ -20,6 +20,7 @@ const Restaurant = require('./models/restaurant')
 
 // 載入 mongoose
 const mongoose = require('mongoose')
+const restaurant = require('./models/restaurant')
 
 // 加入這段 code, 僅在非正式環境時, 使用 dotenv
 if (process.env.NODE_ENV !== 'production') {
@@ -58,6 +59,15 @@ app.post('/restaurants', (req, res) => {
   const data = req.body // 從 req.body 拿出表單裡的資料
   Restaurant.create(data)  // 存入資料庫
     .then(() => res.redirect('/')) // 新增完成後導回首頁
+    .catch(error => console.log(error))
+})
+
+//瀏覽餐廳詳細資料
+app.get('/restaurants/:id', (req, res) => {
+  const id = req.params.id
+  Restaurant.findById(id)
+    .lean()
+    .then(restaurant => res.render('detail', { restaurant }))
     .catch(error => console.log(error))
 })
 
