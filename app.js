@@ -2,6 +2,7 @@
 const express = require('express')
 const app = express()
 
+
 //啟用body-parser
 const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extented: true }))
@@ -17,10 +18,9 @@ app.use(express.static('public'))
 
 //載入 Restaurant model 
 const Restaurant = require('./models/restaurant')
-
+const restaurant = require('./models/restaurant')
 // 載入 mongoose
 const mongoose = require('mongoose')
-const restaurant = require('./models/restaurant')
 
 // 加入這段 code, 僅在非正式環境時, 使用 dotenv
 if (process.env.NODE_ENV !== 'production') {
@@ -68,6 +68,37 @@ app.get('/restaurants/:id', (req, res) => {
   Restaurant.findById(id)
     .lean()
     .then(restaurant => res.render('detail', { restaurant }))
+    .catch(error => console.log(error))
+})
+
+//編輯餐廳的頁面
+app.get('/restaurants/:id/edit', (req, res) => {
+  const id = req.params.id
+  Restaurant.findById(id)
+    .lean()
+    .then(restaurant => res.render('edit', { restaurant }))
+    .catch(error => console.log(error))
+})
+
+//儲存編輯完的頁面
+app.post('/restaurants/:id/edit', (req, res) => {
+  const id = req.params.id
+  const data = req.body
+  return Restaurant.findById(id)
+    .then(restaurant => {
+      restaurant = data
+      return restaurant.save()
+    })
+    .then(() => res.redirect(`/restaurants/${id}`))
+    .catch(error => console.log(error))
+})
+
+//刪除頁面
+app.post('/restaurants/:id/delete', (req,res) => {
+  const id = req.params.id
+  return Restaurant.findById(id)
+    .then(restaurant => restaurant.remove())
+    .then(() => res.redirect('/'))
     .catch(error => console.log(error))
 })
 
