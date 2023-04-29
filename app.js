@@ -18,7 +18,7 @@ app.use(express.static('public'))
 
 //載入 Restaurant model 
 const Restaurant = require('./models/restaurant')
-const restaurant = require('./models/restaurant')
+
 // 載入 mongoose
 const mongoose = require('mongoose')
 
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 //process.env.MONGODB_URI
-mongoose.connect('mongodb+srv://alpha:camp@cluster0.rdlqvcs.mongodb.net/restaurant-list?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // 取得資料庫連線狀態
 const db = mongoose.connection
@@ -87,7 +87,7 @@ app.post('/restaurants/:id/edit', (req, res) => {
   return Restaurant.findById(id)
     .then(restaurant => {
       restaurant = data
-      return restaurant.save()
+      return restaurant.save() //<----超奇怪
     })
     .then(() => res.redirect(`/restaurants/${id}`))
     .catch(error => console.log(error))

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Restaurant = require('../restaurant')
 const restaurantList = require('../../restaurant.json').results
 
-mongoose.connect('mongodb+srv://alpha:camp@cluster0.rdlqvcs.mongodb.net/restaurant-list?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const db = mongoose.connection
 db.on('error', () => {
