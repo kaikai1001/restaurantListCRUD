@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 //process.env.MONGODB_URI
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://alpha:camp@cluster0.rdlqvcs.mongodb.net/restaurant-list?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
 
 // 取得資料庫連線狀態
 const db = mongoose.connection
@@ -46,6 +46,23 @@ app.get('/', (req, res) => {
   Restaurant.find()
     .lean()
     .then(restaurants => res.render('index', { restaurants }))
+    .catch(error => console.log(error))
+})
+
+//搜尋餐廳
+app.get('/search', (req, res) => {
+  const keyword = req.query.keyword
+  if (!keyword) res.redirect('/')
+  Restaurant.find()
+    .lean()
+    .then(restaurants => {
+      const filterRestaurants = restaurants.filter(
+        rest => {
+          return rest.name.toLowerCase().includes(keyword.toLowerCase()) || rest.category.toLowerCase().includes(keyword.toLowerCase())
+        }
+      )
+      res.render('index', { restaurants: filterRestaurants, keyword })
+    })
     .catch(error => console.log(error))
 })
 
@@ -94,7 +111,7 @@ app.post('/restaurants/:id/edit', (req, res) => {
 })
 
 //刪除頁面
-app.post('/restaurants/:id/delete', (req,res) => {
+app.post('/restaurants/:id/delete', (req, res) => {
   const id = req.params.id
   return Restaurant.findById(id)
     .then(restaurant => restaurant.remove())
