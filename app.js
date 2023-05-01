@@ -2,6 +2,9 @@
 const express = require('express')
 const app = express()
 
+// 載入 method-override
+const methodOverride = require('method-override')
+app.use(methodOverride('_method'))
 
 //啟用body-parser
 const bodyParser = require('body-parser')
@@ -98,7 +101,7 @@ app.get('/restaurants/:id/edit', (req, res) => {
 })
 
 //儲存編輯完的頁面
-app.post('/restaurants/:id/edit', (req, res) => {
+app.put('/restaurants/:id', (req, res) => {
   const id = req.params.id
   const data = req.body
   return Restaurant.findById(id)
@@ -111,7 +114,7 @@ app.post('/restaurants/:id/edit', (req, res) => {
 })
 
 //刪除頁面
-app.post('/restaurants/:id/delete', (req, res) => {
+app.delete('/restaurants/:id', (req, res) => {
   const id = req.params.id
   return Restaurant.findById(id)
     .then(restaurant => restaurant.remove())
