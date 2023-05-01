@@ -2,6 +2,7 @@
 const express = require('express')
 const app = express()
 
+
 // 載入 method-override
 const methodOverride = require('method-override')
 app.use(methodOverride('_method'))
@@ -19,11 +20,17 @@ app.set('view engine', 'hbs')
 //使用靜態檔案
 app.use(express.static('public'))
 
+// 引用路由器
+const routes = require('./routes')
+// 將 request 導入路由器
+app.use(routes)
+
 //載入 Restaurant model 
 const Restaurant = require('./models/restaurant')
 
 // 載入 mongoose
 const mongoose = require('mongoose')
+
 
 // 加入這段 code, 僅在非正式環境時, 使用 dotenv
 if (process.env.NODE_ENV !== 'production') {
@@ -42,84 +49,6 @@ db.on('error', () => {
 // 連線成功
 db.once('open', () => {
   console.log('mongodb connected!')
-})
-
-// 設定首頁路由
-app.get('/', (req, res) => {
-  Restaurant.find()
-    .lean()
-    .then(restaurants => res.render('index', { restaurants }))
-    .catch(error => console.log(error))
-})
-
-//搜尋餐廳
-app.get('/search', (req, res) => {
-  const keyword = req.query.keyword
-  if (!keyword) res.redirect('/')
-  Restaurant.find()
-    .lean()
-    .then(restaurants => {
-      const filterRestaurants = restaurants.filter(
-        rest => {
-          return rest.name.toLowerCase().includes(keyword.toLowerCase()) || rest.category.toLowerCase().includes(keyword.toLowerCase())
-        }
-      )
-      res.render('index', { restaurants: filterRestaurants, keyword })
-    })
-    .catch(error => console.log(error))
-})
-
-//新增餐廳的頁面
-app.get('/restaurants/new', (req, res) => {
-  res.render('new')
-})
-
-//新增餐廳
-app.post('/restaurants', (req, res) => {
-  const data = req.body // 從 req.body 拿出表單裡的資料
-  Restaurant.create(data)  // 存入資料庫
-    .then(() => res.redirect('/')) // 新增完成後導回首頁
-    .catch(error => console.log(error))
-})
-
-//瀏覽餐廳詳細資料
-app.get('/restaurants/:id', (req, res) => {
-  const id = req.params.id
-  Restaurant.findById(id)
-    .lean()
-    .then(restaurant => res.render('detail', { restaurant }))
-    .catch(error => console.log(error))
-})
-
-//編輯餐廳的頁面
-app.get('/restaurants/:id/edit', (req, res) => {
-  const id = req.params.id
-  Restaurant.findById(id)
-    .lean()
-    .then(restaurant => res.render('edit', { restaurant }))
-    .catch(error => console.log(error))
-})
-
-//儲存編輯完的頁面
-app.put('/restaurants/:id', (req, res) => {
-  const id = req.params.id
-  const data = req.body
-  return Restaurant.findById(id)
-    .then(restaurant => {
-      restaurant = data
-      return restaurant.save() //<----超奇怪
-    })
-    .then(() => res.redirect(`/restaurants/${id}`))
-    .catch(error => console.log(error))
-})
-
-//刪除頁面
-app.delete('/restaurants/:id', (req, res) => {
-  const id = req.params.id
-  return Restaurant.findById(id)
-    .then(restaurant => restaurant.remove())
-    .then(() => res.redirect('/'))
-    .catch(error => console.log(error))
 })
 
 // 設定 port 3000
